@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language>
+  <page id="1990786086" title="BW Build Limits" descr="Texts" voice="no">
+    <t id="1">BW Build Limits mod is installed</t>
+    <t id="2">Build Limits</t>
+
+    <!-- options menu -->
+    <t id="101">BW Build Limits Menu</t>
+
+    <t id="102">Module Limits</t>
+    <t id="103">Faction Space Station Limits</t>
+    <t id="104">Per Sector Station Limits</t>
+
+    <t id="105">Production</t> <!-- default 4, from 1 to 12 -->
+    <t id="106">How many production modules are allowed per station</t>
+    <t id="107">Build SM</t> <!-- default 1, from 1 to 3 -->
+    <t id="108">How many small and medium ship building modules are allowed per station</t>
+    <t id="109">Build L</t> <!-- default 1, from 1 to 4 -->
+    <t id="110">How many large ship building modules are allowed per station</t>
+    <t id="111">Build XL</t> <!-- default 1, from 1 to 3 -->
+    <t id="112">How many extra large ship building modules are allowed per station</t>
+    <t id="113">Storage</t> <!-- default 10, from 2 to 20 -->
+    <t id="114">How many storage modules of any size are allowed per station</t>
+    <t id="115">Habidation</t> <!-- default 5, from 1 to 20 -->
+    <t id="116">How many habidation modules of any size are allowed per station</t>
+    <t id="117">Pier</t> <!-- default 1, from 1 to 3 -->
+    <t id="118">How many pier modules of any size are allowed per station</t>
+    <t id="119">Docking</t> <!-- default 2, from 1 to 3 -->
+    <t id="120">How many docking modules of any size are allowed per station</t>
+    <t id="121">Processing</t> <!-- default 1, from 1 to 4 -->
+    <t id="122">How many processing modules of any size are allowed per station</t>
+    <t id="125">Defence</t> <!-- default 10, from 1 to 30 -->
+    <t id="126">How many defence modules of any type are allowed per station</t>
+
+    <t id="123">Allow Mixed Production and Processing</t> <!-- default false -->
+    <t id="124">Whether production and processing modules are allowed on the same station</t>
+
+    <t id="131">At 0 relation</t> <!-- default 0, from 0 to 20 -->
+    <t id="132">How many stations you can have in a factions space when your relation to them is 0</t>
+    <t id="133">At 5 relation</t> <!-- default 1, from 0 to 20 -->
+    <t id="134">How many stations you can have in a factions space when your relation to them is 5</t>
+    <t id="135">At 10 relation</t> <!-- default 2, from 0 to 20 -->
+    <t id="136">How many stations you can have in a factions space when your relation to them is 10</t>
+    <t id="137">At 15 relation</t> <!-- default 3, from 0 to 20 -->
+    <t id="138">How many stations you can have in a factions space when your relation to them is 15</t>
+    <t id="139">At 20 relation</t> <!-- default 4, from 0 to 20 -->
+    <t id="140">How many stations you can have in a factions space when your relation to them is 20</t>
+    <t id="141">At 25 relation</t> <!-- default 5, from 0 to 20 -->
+    <t id="142">How many stations you can have in a factions space when your relation to them is 25</t>
+    <t id="143">At 30 relation</t> <!-- default 10, from 0 to 20 -->
+    <t id="144">How many stations you can have in a factions space when your relation to them is 30</t>
+
+    <t id="151">In Unowned Sectors</t> <!-- default 1, from 1 to 5 -->
+    <t id="152">How many stations you can have in an unowned sector</t>
+    <t id="153">In Other Faction Sectors</t> <!-- default 2, from 2 to 20 -->
+    <t id="154">How many stations you can have in a faction sector</t>
+    <t id="155">In Your Sectors</t> <!-- default 8, from 2 to 30 -->
+    <t id="156">How many stations you can have in an unowned sector</t>
+
+    <t id="171">From $MIN$ to $MAX$, default $DEFAULT$</t>
+    <t id="172">Default $DEFAULT$</t>
+
+    <!-- in game events -->
+    <t id="201">$STATION$ has exceeded $LIMIT$ $MODULE$ modules, construction has been halted. Remove violating modules from the construction plan to stop this message.</t>
+    <t id="202">Station module limits exceeded, see log for details</t>
+
+    <t id="203">More than $LIMIT$ stations in $FACTION$ space, the newest station $STATION$ has had its plot approval revoked!</t>
+    <t id="204">Faction station limit exceeded, see log for details</t>
+
+    <t id="208">More than $LIMIT$ stations in $SECTOR$ ($SECTOR_OWNER$), the newest smallest station $STATION$ has been removed.</t>
+    <t id="209">Sector station limit exceeded, see log for details</t>
+  </page>
+</language>

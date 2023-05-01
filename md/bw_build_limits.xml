@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="BWBuildLimits"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../extracted/libraries/md.xsd">
+  <cues>
+    <!-- <cue name="OnLuaLoaderReady">
+        <conditions>
+            <event_ui_triggered screen="'Lua_Loader'" control="'Ready'"/>
+        </conditions>
+        <actions>
+            <raise_lua_event name="'Lua_Loader.Load'" param="'extensions.bw_build_limits.ui.bw_build_limits'"/>
+        </actions>
+    </cue>
+
+    <cue name="OnLuaLoaderReadyCompleted">
+        <conditions>
+            <event_cue_completed cue="OnLuaLoaderReady"/>
+        </conditions>
+        <actions>
+            <reset_cue cue="OnLuaLoaderReady"/>
+            <reset_cue cue="this"/>
+        </actions>
+    </cue> -->
+    <cue name="BuildLimitsInit">
+      <conditions>
+        <check_any>
+          <event_cue_signalled cue="md.Setup.GameStart" />
+          <event_player_created />
+          <event_cue_signalled />
+          <event_game_loaded />
+        </check_any>
+      </conditions>
+      <actions>
+        <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" text="'Initializing'" />
+        <show_help duration="7s" custom="{1990786086,1}" />
+
+        <set_value name="$ModuleLimitProduction" exact="4"/> <!-- configurable from 1 to 12 -->
+        <set_value name="$ModuleLimitBuildSM" exact="1"/> <!-- configurable from 1 to 3 : each can build many ships at a time -->
+        <set_value name="$ModuleLimitBuildL" exact="1"/> <!-- configurable from 1 to 4 : each can only build 1 ship at a time -->
+        <set_value name="$ModuleLimitBuildXL" exact="1"/> <!-- configurable from 1 to 3 : each can only build 1 ship at a time -->
+        <set_value name="$ModuleLimitStorage" exact="10"/> <!-- configurable from 2 to 20 : any refinery will need at least 2 -->
+        <set_value name="$ModuleLimitHabitation" exact="5"/> <!-- configurable from 1 to 20 -->
+        <set_value name="$ModuleLimitPier" exact="1"/> <!-- configurable from 1 to 3 -->
+        <set_value name="$ModuleLimitDocking" exact="2"/> <!-- configurable from 1 to 3 -->
+        <set_value name="$ModuleLimitProcessing" exact="1"/> <!-- configurable from 1 to 4 -->
+        <set_value name="$ModuleLimitDefence" exact="10"/> <!-- configurable from 1 to 20 -->
+
+        <set_value name="$ModuleAllowProcessingOnProduction" exact="false"/> <!-- whether a processing module is allowed on the same station as a production one -->
+
+        <set_value name="$FactionStationLimitAt0" exact="0"/> <!-- configurable from 0 to 20 -->
+        <set_value name="$FactionStationLimitAt5" exact="1"/> <!-- configurable from 0 to 20 -->
+        <set_value name="$FactionStationLimitAt10" exact="2"/> <!-- configurable from 0 to 20 -->
+        <set_value name="$FactionStationLimitAt15" exact="3"/> <!-- configurable from 0 to 20 -->
+        <set_value name="$FactionStationLimitAt20" exact="4"/> <!-- configurable from 0 to 20 -->
+        <set_value name="$FactionStationLimitAt25" exact="5"/> <!-- configurable from 0 to 20 -->
+        <set_value name="$FactionStationLimitAt30" exact="10"/> <!-- configurable from 0 to 20 -->
+
+        <set_value name="$StationPerOwnerlessSectorLimit" exact="1"/> <!-- configurable from 1 to 5 -->
+        <set_value name="$StationPerFactionSectorLimit" exact="2"/> <!-- configurable from 2 to 20 -->
+        <set_value name="$StationPerPlayerSectorLimit" exact="8"/> <!-- configurable from 2 to 30 -->
+
+        <!-- TODO: exclude mission related stations entirely from this -->
+      </actions>
+
+      <cues>
+        <library name="ApplyModuleLimitToStation" purpose="run_actions">
+          <params>
+            <param name="station" />
+            <param name="module_class" />
+            <param name="module_limit" />
+            <param name="can_build_class" default="null" comment="If provided then checks for specific buildable classes (for build modules)"/>
+            <param name="exclude_module_class" default="null" comment="If provided then the precense of this class precludes the other"/>
+          </params>
+          <actions>
+            <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+              text="player.age + ' [ApplyModuleLimitToAllStations]   ApplyModuleLimitToStation '
+                + ' station=' + $station.name
+                + ' module_class=' + $module_class
+                + ' module_limit=' + $module_limit
+                + ' can_build_class=' + $can_build_class
+                + ' exclude_module_class=' + $exclude_module_class
+                "/>
+            <set_value name="$module_count" exact="0"/>
+            <set_value name="$exclude_module_count" exact="0"/>
+
+            <!-- <do_if value="$station.build != null and $station.build.isexpansion">
+              <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                text="player.age + ' [ApplyModuleLimitToAllStations]   station.build.macro = ' + $station.build.buildobject.name"/>
+            </do_if>
+            <do_for_each name="$qbuild" in="$station.builds.inprogress">
+              <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                text="player.age + ' [ApplyModuleLimitToAllStations]   station.builds.inprogress ' + $qbuild.buildobject.name"/>
+            </do_for_each>
+            <do_for_each name="$qbuild" in="$station.builds.queued">
+              <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                text="player.age + ' [ApplyModuleLimitToAllStations]   station.builds.queued ' + $qbuild.buildobject.name"/>
+            </do_for_each>
+            <do_for_each name="$qbuild" in="$station.builds.todelete">
+              <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                text="player.age + ' [ApplyModuleLimitToAllStations]   station.builds.todelete ' + $qbuild.buildobject.name"/>
+            </do_for_each> -->
+
+            <!-- count operational module_class and optionally exclude_module_class -->
+            <do_for_each name="$module" in="$station.modules.operational.list">
+              <do_if value="$module.isrealclass.{$module_class} 
+                            and 
+                            (not $can_build_class or $module.canbuildclass.{$can_build_class})">
+                <set_value name="$module_count" exact="$module_count + 1"/>
+              </do_if>
+              <do_if value="$exclude_module_class != null 
+                            and
+                            $module.isrealclass.{$exclude_module_class}">
+                <set_value name="$exclude_module_count" exact="$exclude_module_count + 1"/>
+              </do_if>
+            </do_for_each>
+
+            <!-- count module_class under construction, and add to module to remove list if too many or exclude class was present -->
+            <do_for_each name="$module" in="$station.modules.construction.list">
+              <do_if value="$module.isrealclass.{$module_class} 
+                            and 
+                            (not $can_build_class or $module.canbuildclass.{$can_build_class})">
+                <set_value name="$module_count" exact="$module_count + 1"/>
+                <do_if value="$module_count gt $module_limit 
+                              or 
+                              $exclude_module_count != 0">
+                  <add_to_group groupname="$modules_to_remove" object="$module"/>
+                </do_if>
+              </do_if>
+            </do_for_each>
+
+            <!-- stop the builds if required -->
+            <do_if value="@$modules_to_remove and $modules_to_remove.count gt 0">
+              <substitute_text text="$station_removed_modules_text" source="{1990786086,201}">
+                <replace string="'$STATION$'" with="$station.name"/>
+                <replace string="'$LIMIT$'" with="$module_limit"/>
+                <replace string="'$MODULE$'" with="$modules_to_remove.{1}.name" />
+              </substitute_text>
+              <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                text="player.age + ' [ApplyModuleLimitToAllStations]   ' + $station_removed_modules_text"/>
+              <show_help allowclose="true" custom="{1990786086,202}" duration="5s" />
+              <write_to_logbook category="general" title="$station_removed_modules_text" object="$station" interaction="showonmap" />
+              <destroy_group group="$modules_to_remove" />
+              <!-- <abort_build build="$station.build" container="$station"/> -->
+            </do_if>
+          </actions>
+        </library>
+
+        <cue name="ApplyModuleLimitToAllStations" checkinterval="37s" instantiate="true">
+          <actions>
+            <find_station_by_true_owner faction="faction.player" space="player.galaxy" groupname="$player_stations" multiple="true"/>
+            <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+              text="player.age + ' [ApplyModuleLimitToAllStations] Found ' + $player_stations.count + ' player stations'"/>
+
+            <!-- Applying the general module limits -->
+            <do_for_each name="$station" in="$player_stations">
+              <do_if value="$station.hasplannedconstruction">
+                <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                  text="player.age + ' [ApplyModuleLimitToAllStations] ' + $station.name + ' has planned construction, checking module counts'"/>
+
+                <!-- production -->
+                <set_value name="$exclude_module_class" exact="null"/>
+                <do_if value="$ModuleAllowProcessingOnProduction">
+                  <set_value name="$exclude_module_class" exact="class.processingmodule"/>
+                </do_if>
+
+                <run_actions ref="ApplyModuleLimitToStation">
+                  <param name="station" value="$station"/>
+                  <param name="module_class" value="class.production"/>
+                  <param name="module_limit" value="$ModuleLimitProduction"/>
+                  <param name="exclude_module_class" value="@$exclude_module_class"/>
+                </run_actions>
+
+                <!-- processingmodule -->
+                <set_value name="$exclude_module_class" exact="null"/>
+                <do_if value="$ModuleAllowProcessingOnProduction">
+                  <set_value name="$exclude_module_class" exact="class.production"/>
+                </do_if>
+                
+                <run_actions ref="ApplyModuleLimitToStation">
+                  <param name="station" value="$station"/>
+                  <param name="module_class" value="class.processingmodule"/>
+                  <param name="module_limit" value="$ModuleLimitProcessing"/>
+                </run_actions>
+
+                <!-- buildmodule ship_s -->
+                <run_actions ref="ApplyModuleLimitToStation">
+                  <param name="station" value="$station"/>
+                  <param name="module_class" value="class.buildmodule"/>
+                  <param name="module_limit" value="$ModuleLimitBuildSM"/>
+                  <param name="can_build_class" value="class.ship_s"/>
+                </run_actions>
+
+                <!-- buildmodule ship_l -->
+                <run_actions ref="ApplyModuleLimitToStation">
+                  <param name="station" value="$station"/>
+                  <param name="module_class" value="class.buildmodule"/>
+                  <param name="module_limit" value="$ModuleLimitBuildL"/>
+                  <param name="can_build_class" value="class.ship_l"/>
+                </run_actions>
+
+                <!-- buildmodule ship_xl -->
+                <run_actions ref="ApplyModuleLimitToStation">
+                  <param name="station" value="$station"/>
+                  <param name="module_class" value="class.buildmodule"/>
+                  <param name="module_limit" value="$ModuleLimitBuildXL"/>
+                  <param name="can_build_class" value="class.ship_xl"/>
+                </run_actions>
+
+                <!-- storage -->
+                <run_actions ref="ApplyModuleLimitToStation">
+                  <param name="station" value="$station"/>
+                  <param name="module_class" value="class.storage"/>
+                  <param name="module_limit" value="$ModuleLimitStorage"/>
+                </run_actions>
+
+                <!-- habitation -->
+                <run_actions ref="ApplyModuleLimitToStation">
+                  <param name="station" value="$station"/>
+                  <param name="module_class" value="class.habitation"/>
+                  <param name="module_limit" value="$ModuleLimitHabitation"/>
+                </run_actions>
+
+                <!-- pier -->
+                <run_actions ref="ApplyModuleLimitToStation">
+                  <param name="station" value="$station"/>
+                  <param name="module_class" value="class.pier"/>
+                  <param name="module_limit" value="$ModuleLimitPier"/>
+                </run_actions>
+
+                <!-- dockarea -->
+                <run_actions ref="ApplyModuleLimitToStation">
+                  <param name="station" value="$station"/>
+                  <param name="module_class" value="class.dockarea"/>
+                  <param name="module_limit" value="$ModuleLimitDocking"/>
+                </run_actions>
+
+                <!-- defence -->
+                <run_actions ref="ApplyModuleLimitToStation">
+                  <param name="station" value="$station"/>
+                  <param name="module_class" value="class.defencemodule"/>
+                  <param name="module_limit" value="$ModuleLimitDefence"/>
+                </run_actions>
+
+              </do_if>
+            </do_for_each>
+            <reset_cue cue="this"/>
+          </actions>
+        </cue>
+
+        <cue name="ApplyFactionStationLimits" checkinterval="127s" instantiate="true">
+          <actions>
+            <!--
+              For each faction, determine the max station count, find all player stations in that factions space. If limit is exceeded, then revoke the paid status of the build plot of the newest station.
+             -->
+            
+            <get_factions_by_tag tag="tag.economic" result="$all_factions"/>
+            <find_station_by_true_owner faction="faction.player" 
+              space="player.galaxy" groupname="$player_stations" multiple="true"/>
+            <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+              text="player.age + ' [ApplyFactionStationLimits] Found ' + $player_stations.count + ' player stations, checking against ' + $all_factions.count + ' factions'"/>
+
+            <do_for_each name="$faction" in="$all_factions">
+              <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                text="player.age + ' [ApplyFactionStationLimits]   Checking ' + $faction + ' player stations'"/>
+              <set_value name="$faction_station_count" exact="0"/>
+              <set_value name="$faction_player_relation" exact="$faction.relationto.{player.faction}"/>
+              <set_value name="$faction_station_limit" exact="0"/>
+              <do_if value="$faction_player_relation ge 30">
+                <set_value name="$faction_station_limit" exact="$FactionStationLimitAt30"/>
+              </do_if>
+              <do_elseif value="$faction_player_relation ge 25">
+                <set_value name="$faction_station_limit" exact="$FactionStationLimitAt25"/>
+              </do_elseif>
+              <do_elseif value="$faction_player_relation ge 20">
+                <set_value name="$faction_station_limit" exact="$FactionStationLimitAt20"/>
+              </do_elseif>
+              <do_elseif value="$faction_player_relation ge 15">
+                <set_value name="$faction_station_limit" exact="$FactionStationLimitAt15"/>
+              </do_elseif>
+              <do_elseif value="$faction_player_relation ge 10">
+                <set_value name="$faction_station_limit" exact="$FactionStationLimitAt10"/>
+              </do_elseif>
+              <do_elseif value="$faction_player_relation ge 5">
+                <set_value name="$faction_station_limit" exact="$FactionStationLimitAt5"/>
+              </do_elseif>
+              <do_elseif value="$faction_player_relation ge 0">
+                <set_value name="$faction_station_limit" exact="$FactionStationLimitAt0"/>
+              </do_elseif>
+              <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                text="player.age + ' [ApplyFactionStationLimits]     ' + $faction + ' player station limit is ' + $faction_station_limit"/>
+
+              <set_value name="$newest_station" exact="null"/>
+              <do_for_each name="$station" in="$player_stations">
+                <do_if value="$station.paidbuildplot.payment != 0 and $station.sector.owner == $faction">
+                  <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                    text="player.age + ' [ApplyFactionStationLimits]       station ' + $station.name + ' is in ' + $faction + ' space, with a paid build plot'"/>
+                  <set_value name="$faction_station_count" exact="$faction_station_count + 1"/>
+                  <do_if value="$newest_station == null
+                                or 
+                                $newest_station.spawntime lt $station.spawntime">
+                    <set_value name="$newest_station" exact="$station"/>
+                  </do_if>
+                </do_if>
+              </do_for_each>
+              <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                text="player.age + ' [ApplyFactionStationLimits]     station count ' + $faction_station_count + ' in ' + $faction + ' space'"/>
+              <do_if value="$faction_station_count gt $faction_station_limit">
+                  <substitute_text text="$plot_revoked_text" source="{1990786086,203}">
+                    <replace string="'$STATION$'" with="$newest_station.name"/>
+                    <replace string="'$LIMIT$'" with="$faction_station_limit"/>
+                    <replace string="'$FACTION$'" with="$faction.name" />
+                  </substitute_text>
+                  <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                    text="player.age + ' [ApplyFactionStationLimits]     ' + $plot_revoked_text" />
+                  <show_help allowclose="true" custom="{1990786086,204}" duration="5s" />
+                  <write_to_logbook category="general" title="$plot_revoked_text" object="$newest_station" interaction="showonmap" />
+                  <!-- set paid for plot size to 0 -->
+                  <set_build_plot object="$newest_station" paid="true" x="0" y="0" z="0"/>
+                </do_if>
+            </do_for_each>
+          </actions>
+        </cue>
+
+        <cue name="ApplySectorStationLimits" checkinterval="131s" instantiate="true" >
+          <actions>
+            
+            <!-- For each sector with player stations, apply the appropriate limit -->
+            
+            <!-- Get all the player stations -->
+            <find_station_by_true_owner faction="faction.player" space="player.galaxy" groupname="$player_stations" multiple="true"/>
+            
+            <set_value name="$sector_station_map" exact="table []"/>
+
+            <!-- Group them by sector -->
+            <do_for_each name="$station" in="$player_stations">
+              <do_if value="not @$sector_station_map.{$station.sector}">
+                <set_value name="$sector_station_map.{$station.sector}" exact="[$station]" />
+              </do_if>
+              <do_else>
+                <append_to_list name="$sector_station_map.{$station.sector}" exact="$station" />
+              </do_else>
+            </do_for_each>
+
+            <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+              text="player.age + ' [ApplySectorStationLimits] Found ' + $player_stations.count + ' player stations in ' + $sector_station_map.keys.count + ' sectors'"/>
+
+            <!-- Apply limits -->
+            <do_for_each name="$sector" in="$sector_station_map.keys.list">
+              <set_value name="$stations_in_sector" exact="$sector_station_map.{$sector}"/>
+
+              <!-- Determine which limit to use -->
+              <do_if value="$sector.owner == faction.ownerless">
+                <set_value name="$limit" exact="$StationPerOwnerlessSectorLimit"/>
+              </do_if>
+              <do_elseif value="$sector.owner == player.faction">
+                <set_value name="$limit" exact="$StationPerPlayerSectorLimit"/>
+              </do_elseif>
+              <do_else>
+                <set_value name="$limit" exact="$StationPerFactionSectorLimit"/>
+              </do_else>
+
+              <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                text="player.age + ' [ApplySectorStationLimits]   ' + $stations_in_sector.count + ' player stations in ' + $sector.name + ' (' + $sector.owner.name + ') limit is ' + $limit"/>
+
+              <do_if value="$stations_in_sector.count gt $limit">
+                <!-- Find the newest one that has 1 or 0 modules and blow it up -->
+                <set_value name="$newest_station" exact="null"/>
+                <do_for_each name="$station" in="$stations_in_sector">
+                  <do_if value="$station.modules.operational.count lt 2
+                                and
+                                ($newest_station == null
+                                 or 
+                                 $newest_station.spawntime lt $station.spawntime)">
+                    <set_value name="$newest_station" exact="$station"/>
+                  </do_if>
+                </do_for_each>
+                <do_if value="$newest_station != null">
+                  <substitute_text text="$station_removed_txt" source="{1990786086,208}">
+                    <replace string="'$STATION$'" with="$newest_station.name"/>
+                    <replace string="'$LIMIT$'" with="$limit"/>
+                    <replace string="'$SECTOR$'" with="$sector.name"/>
+                    <replace string="'$SECTOR_OWNER$'" with="$sector.owner.name" />
+                  </substitute_text>
+                  <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                    text="player.age + ' [ApplySectorStationLimits]     ' + $station_removed_txt"/>
+                  <show_help allowclose="true" custom="{1990786086,209}" duration="5s"/>
+                  <write_to_logbook category="general" title="$station_removed_txt" object="$newest_station" interaction="showonmap" />
+                  
+                  <!-- force undock all ships -->
+                  <find_ship space="$station" docked="true" groupname="$docked_ships"/>
+                  <do_for_each name="$ship" in="$docked_ships">
+                    <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                      text="player.age + ' [ApplySectorStationLimits]     force undocking ' + $ship.name"/>
+                    <undock ship="$ship" />
+                  </do_for_each>
+                  <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+                      text="player.age + ' [ApplySectorStationLimits]     destroying station ' + $newest_station.name"/>
+                  <destroy_object object="$newest_station"/>
+                </do_if>
+              </do_if>
+            </do_for_each>
+
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+  </cues>
+</mdscript>

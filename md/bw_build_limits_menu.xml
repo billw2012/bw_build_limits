@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="BWBuildLimitsMenu" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../extracted/libraries/md.xsd">
+  <cues>
+    <cue name="Simple_Menu_Options_Reloaded" instantiate="true">
+      <conditions>
+        <event_cue_signalled cue="md.Simple_Menu_Options.Reloaded" />
+      </conditions>
+      <actions>
+        <signal_cue_instantly cue="md.Simple_Menu_API.Register_Options_Menu"
+          param="table[
+              $id = 'bw_build_limits_menu',
+              $columns = 2,
+              $title = '\033C'+{1990786086, 101},
+              $onOpen = BuildOptionsMenu
+          ]" />
+        <reset_cue cue="this" />
+      </actions>
+    </cue>
+
+    <library name="CreateSlider" purpose="run_actions">
+      <params>
+        <param name="params"/>
+      </params>
+      <actions>
+        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[$col=1, $text=$params.$label]" />
+        <substitute_text text="$default_text" source="{1990786086,171}">
+          <replace string="'$MIN$'" with="$params.$min"/>
+          <replace string="'$MAX$'" with="$params.$max"/>
+          <replace string="'$DEFAULT$'" with="$params.$default" />
+        </substitute_text>
+        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Slider"
+          param="table[
+            $id = $params.$variable,
+            $start = md.BWBuildLimits.BuildLimitsInit.{'$' + $params.$variable},
+            $col = 2,
+            $text = table[$text=''],
+            $min = $params.$min, $max = $params.$max, $suffix = '',
+            $default = $params.$default,
+            $mouseOverText = $params.$description + '\n' + $default_text,
+            $onSliderCellChanged = OnSliderChange
+            ]" />
+      </actions>
+    </library>
+
+    <library name="CreateCheckbox" purpose="run_actions">
+      <params>
+        <param name="params"/>
+      </params>
+      <actions>
+        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[$col=1, $text=$params.$label]" />
+        <substitute_text text="$default_text" source="{1990786086,172}">
+          <replace string="'$DEFAULT$'" with="$params.$default" />
+        </substitute_text>
+        <signal_cue_instantly cue="md.Simple_Menu_API.Make_CheckBox"
+          param="table[
+            $id = $params.$variable,
+            $checked = md.BWBuildLimits.BuildLimitsInit.{'$' + $params.$variable},
+            $col = 2,
+            $width = 'Helper.standardButtonHeight', $height = 'Helper.standardButtonHeight',
+            $default = $params.$default,
+            $mouseOverText = $params.$description + '\n' + $default_text,
+            $onClick = OnCheckboxChange
+            ]" />
+      </actions>
+    </library>
+    <library name="CreateSpacer" purpose="run_actions">
+      <actions>
+        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[$col=1, $text='']" />
+      </actions>
+    </library>
+    <library name="CreateTitle" purpose="run_actions">
+      <params>
+        <param name="text" />
+      </params>
+      <actions>
+        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[$col=1, $text=$text, $color = 'Helper.color.blue']" />
+      </actions>
+    </library>
+    <cue name="BuildOptionsMenu" instantiate="true">
+      <conditions>
+        <event_cue_signalled />
+      </conditions>
+      <actions>
+        <run_actions ref="CreateTitle"><param name="text" value="{1990786086, 101}" /></run_actions>
+
+        <run_actions ref="CreateSpacer"/>
+
+        <!-- MODULE LIMITS -->
+        <run_actions ref="CreateTitle"><param name="text" value="{1990786086, 102}" /></run_actions>
+
+        <!-- $ModuleLimitProduction -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'ModuleLimitProduction', $label = {1990786086,105}, $description = {1990786086,106}, $min = 1, $max = 12, $default = 4]"/>
+        </run_actions>
+        <!-- $ModuleLimitBuildSM -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'ModuleLimitBuildSM', $label = {1990786086,107}, $description = {1990786086,108}, $min = 1, $max = 3, $default = 1]"/>
+        </run_actions>
+        <!-- $ModuleLimitBuildL -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'ModuleLimitBuildL', $label = {1990786086,109}, $description = {1990786086,110}, $min = 1, $max = 4, $default = 1]"/>
+        </run_actions>
+        <!-- $ModuleLimitBuildXL -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'ModuleLimitBuildXL', $label = {1990786086,111}, $description = {1990786086,112}, $min = 1, $max = 3, $default = 1]"/>
+        </run_actions>
+        <!-- $ModuleLimitStorage -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'ModuleLimitStorage', $label = {1990786086,113}, $description = {1990786086,114}, $min = 2, $max = 20, $default = 10]"/>
+        </run_actions>
+        <!-- $ModuleLimitHabitation -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'ModuleLimitHabitation', $label = {1990786086,115}, $description = {1990786086,116}, $min = 1, $max = 20, $default = 5]"/>
+        </run_actions>
+        <!-- $ModuleLimitPier -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'ModuleLimitPier', $label = {1990786086,117}, $description = {1990786086,118}, $min = 1, $max = 3, $default = 1]"/>
+        </run_actions>
+        <!-- $ModuleLimitDocking -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'ModuleLimitDocking', $label = {1990786086,119}, $description = {1990786086,120}, $min = 1, $max = 3, $default = 1]"/>
+        </run_actions>
+        <!-- $ModuleLimitProcessing -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'ModuleLimitProcessing', $label = {1990786086,121}, $description = {1990786086,122}, $min = 1, $max = 4, $default = 1]"/>
+        </run_actions>
+        <!-- $ModuleLimitDefence -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'ModuleLimitDefence', $label = {1990786086,125}, $description = {1990786086,126}, $min = 1, $max = 20, $default = 10]"/>
+        </run_actions>
+
+        <run_actions ref="CreateSpacer"/>
+
+        <!-- $ModuleAllowProcessingOnProduction -->
+        <run_actions ref="CreateCheckbox">
+          <param name="params" value="table [$variable = 'ModuleAllowProcessingOnProduction', $label = {1990786086,123}, $description = {1990786086,124}, $default = false]"/>
+        </run_actions>
+
+        <run_actions ref="CreateSpacer"/>
+
+        <!-- FACTION SPACE STATION LIMITS -->
+        <run_actions ref="CreateTitle"><param name="text" value="{1990786086, 103}" /></run_actions>
+
+        <!-- $FactionStationLimitAt0 -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'FactionStationLimitAt0', $label = {1990786086,131}, $description = {1990786086,132}, $min = 0, $max = 20, $default = 0]"/>
+        </run_actions>
+
+        <!-- $FactionStationLimitAt5 -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'FactionStationLimitAt5', $label = {1990786086,133}, $description = {1990786086,134}, $min = 0, $max = 20, $default = 1]"/>
+        </run_actions>
+
+        <!-- $FactionStationLimitAt10 -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'FactionStationLimitAt10', $label = {1990786086,135}, $description = {1990786086,136}, $min = 0, $max = 20, $default = 2]"/>
+        </run_actions>
+
+        <!-- $FactionStationLimitAt15 -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'FactionStationLimitAt15', $label = {1990786086,137}, $description = {1990786086,138}, $min = 0, $max = 20, $default = 3]"/>
+        </run_actions>
+
+        <!-- $FactionStationLimitAt20 -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'FactionStationLimitAt20', $label = {1990786086,139}, $description = {1990786086,140}, $min = 0, $max = 20, $default = 4]"/>
+        </run_actions>
+
+        <!-- $FactionStationLimitAt25 -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'FactionStationLimitAt25', $label = {1990786086,141}, $description = {1990786086,142}, $min = 0, $max = 20, $default = 5]"/>
+        </run_actions>
+
+        <!-- $FactionStationLimitAt30 -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'FactionStationLimitAt30', $label = {1990786086,143}, $description = {1990786086,144}, $min = 0, $max = 20, $default = 10]"/>
+        </run_actions>
+
+        <run_actions ref="CreateSpacer"/>
+
+        <!-- PER SECTOR STATION LIMITS -->
+        <run_actions ref="CreateTitle"><param name="text" value="{1990786086, 104}" /></run_actions>
+
+        <!-- $StationPerOwnerlessSectorLimit -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'StationPerOwnerlessSectorLimit', $label = {1990786086,151}, $description = {1990786086,152}, $min = 1, $max = 5, $default = 1]"/>
+        </run_actions>
+
+        <!-- $StationPerFactionSectorLimit -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'StationPerFactionSectorLimit', $label = {1990786086,153}, $description = {1990786086,154}, $min = 2, $max = 20, $default = 2]"/>
+        </run_actions>
+
+        <!-- $StationPerPlayerSectorLimit -->
+        <run_actions ref="CreateSlider">
+          <param name="params" value="table [$variable = 'StationPerPlayerSectorLimit', $label = {1990786086,155}, $description = {1990786086,156}, $min = 2, $max = 30, $default = 8]"/>
+        </run_actions>
+
+        <!-- CHECKBOX TEMPLATE
+
+        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
+          param="table[$col=1, $text={1990786086, [[ LABEL ]]}]" />
+        <signal_cue_instantly cue="md.Simple_Menu_API.Make_CheckBox"
+          param="table[
+                        $id = '[[ VARIABLE NO $ ]]',
+                        $checked = md.BWBuildLimits.BuildLimitsInit.$[[ VARIABLE NO $ ]],
+                        $col = 2,
+                        $width = 'Helper.standardButtonHeight', $height = 'Helper.standardButtonHeight',
+                        $default = false,
+                        $mouseOverText = {1990786086, [[ TOOLTIP ]]},
+                        $onClick = OnCheckboxChange
+                    ]" />
+
+        -->
+
+        <!-- SLIDER TEMPLATE
+
+        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
+          param="table[$col=1, $text={1990786086, [[ LABEL ]] }]" />
+        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Slider"
+          param="table[
+                        $id = '[[ VARIABLE NO $ ]]',
+                        $start = md.BWBuildLimits.BuildLimitsInit.$[[ VARIABLE NO $ ]],
+                        $col = 2,
+                        $text = table[$text=''],
+                        $min = [[ MIN ]], $max = [[ MAX ]], $suffix = ' [[ SUFFIX ]]',
+                        $default = [[ DEFAULT ]],
+                        $mouseOverText = {1990786086, [[ TOOLTIP ]]},
+                        $onSliderCellChanged = OnSliderChange
+                    ]" />
+
+        -->
+
+        <!-- DROP DOWN TEMPLATE
+
+        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row"/>
+        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[$col=1, $text={1990786086, [[ LABEL ]]}]" />
+        <signal_cue_instantly cue = "md.Simple_Menu_API.Make_Dropdown"
+          param = "table[
+            $id = '[[ VARIABLE NO $ ]]',
+            $col = 2,
+            $options = [
+              table[$text={1990786086,[[ OPTION A LABEL ]]}, $value=[[ OPTION A VALUE ]] ],
+              table[$text={1990786086,[[ OPTION B LABEL ]]}, $value=[[ OPTION B VALUE ]] ],
+              table[$text={1990786086,[[ OPTION C LABEL ]]}, $value=[[ OPTION C VALUE ]] ]
+            ],
+            $startOption = if $[[ VARIABLE NO $ ]] == [[ OPTION A VALUE ]] then 1 else (
+                           if $[[ VARIABLE NO $ ]] == [[ OPTION B VALUE ]] then 2 else (
+                           if $[[ VARIABLE NO $ ]] == [[ OPTION C VALUE ]] then 3)
+            ),
+            $mouseOverText = {1990786086,[[ TOOLTIP ]]},
+            $onDropDownConfirmed = onDropDownConfirmed
+          ]" />
+        
+        -->
+
+        <!-- SPACER TEMPLATE
+
+        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[$col=1, $text='']" />
+
+        -->
+
+        <!-- HEADER TEMPLATE
+
+        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
+          param="table[$col=1, $text={1990786086, [[ HEADER TEXT ]]}, $color = 'Helper.color.blue']" />
+
+        -->
+
+      </actions>
+    </cue>
+    <cue name="OnCheckboxChange" instantiate="true">
+      <conditions>
+        <event_cue_signalled />
+      </conditions>
+      <actions>
+        <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+          text="player.age + ' [OnCheckboxChange] ' + event.param.$id + ' changed from ' + md.BWBuildLimits.BuildLimitsInit.{'$' + event.param.$id} + ' to ' + event.param.$checked"/>
+        <set_value name="md.BWBuildLimits.BuildLimitsInit.{'$' + event.param.$id}" exact="event.param.$checked" />
+      </actions>
+    </cue>
+    <cue name="OnSliderChange" instantiate="true">
+      <conditions>
+        <event_cue_signalled />
+      </conditions>
+      <actions>
+        <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+          text="player.age + ' [OnSliderChange] ' + event.param.$id + ' changed from ' + md.BWBuildLimits.BuildLimitsInit.{'$' + event.param.$id} + ' to ' + event.param.$value"/>
+        <set_value name="md.BWBuildLimits.BuildLimitsInit.{'$' + event.param.$id}"
+          exact="event.param.$value" />
+      </actions>
+    </cue>
+    <cue name="OnDropDownChange" instantiate="true">
+      <conditions>
+        <event_cue_signalled/>
+      </conditions>
+      <actions>
+        <debug_to_file name="'BWBuildLimits'" directory="'BWBuildLimits'" 
+          text="player.age + ' [OnDropDownChange] ' + event.param.$id + ' changed from ' + md.BWBuildLimits.BuildLimitsInit.{'$' + event.param.$id} + ' to ' + event.param.$option.$value"/>
+        <set_value name="md.BWBuildLimits.BuildLimitsInit.{'$' + event.param.$id}" exact="event.param.$option.$value"/>
+      </actions>
+    </cue>
+  </cues>
+</mdscript>
